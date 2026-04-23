@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
 import { z } from "zod";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -10,8 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { saveSubmission } from "@/lib/contact-storage";
+import { trackEvent } from "@/lib/analytics";
+import { formations } from "@/data/formations";
 
 export const Route = createFileRoute("/contact")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    formation: typeof s.formation === "string" ? s.formation : undefined,
+    session: typeof s.session === "string" ? s.session : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Contact — Infotelcom Formation" },
@@ -20,6 +27,7 @@ export const Route = createFileRoute("/contact")({
         content:
           "Contactez Infotelcom pour vos besoins en formation télécoms et informatique : devis, inscription, sessions intra-entreprise.",
       },
+      { property: "og:type", content: "website" },
       { property: "og:title", content: "Contact — Infotelcom Formation" },
       { property: "og:description", content: "Demandez un devis ou inscrivez-vous à nos formations." },
     ],
@@ -36,6 +44,12 @@ const schema = z.object({
 
 function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const search = Route.useSearch();
+  const preselected = formations.find((f) => f.slug === search.formation);
+  const defaultSubject = preselected
+    ? `Inscription — ${preselected.title}${search.session ? ` (session ${search.session})` : ""}`
+    : "";
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,10 +66,16 @@ function ContactPage() {
     }
     setSubmitting(true);
     setTimeout(() => {
+      saveSubmission(parsed.data);
+      trackEvent("contact_submit", {
+        formation: search.formation,
+        session: search.session,
+        subject: parsed.data.subject,
+      });
       setSubmitting(false);
-      toast.success("Message envoyé ! Nous vous répondons sous 24h.");
-      (e.target as HTMLFormElement).reset();
-    }, 600);
+      toast.success("Demande enregistrée !");
+      navigate({ to: "/contact/confirmation" });
+    }, 400);
   };
 
   return (
@@ -75,9 +95,10 @@ function ContactPage() {
         <section className="container mx-auto grid gap-10 px-4 py-16 lg:grid-cols-[1fr_2fr]">
           <div className="space-y-6">
             {[
-              { icon: MapPin, title: "Adresse", value: "Avenue des Télécoms, Douala" },
-              { icon: Phone, title: "Téléphone", value: "+237 6 00 00 00 00" },
-              { icon: Mail, title: "Email", value: "contact@infotelcom.com" },
+              { icon: MapPin, title: "Adresse", value: "17 rue Linengué, Casis — Brazzaville, Congo" },
+              { icon: Phone, title: "Téléphone", value: "+33 6 52 86 11 59" },
+              { icon: MessageCircle, title: "WhatsApp", value: "+242 06 849 87 92" },
+              { icon: Mail, title: "Email", value: "infotelcomtech@gmail.com" },
             ].map((item) => (
               <div
                 key={item.title}
@@ -98,6 +119,11 @@ function ContactPage() {
             onSubmit={onSubmit}
             className="space-y-5 rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-card)]"
           >
+            {preselected && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-foreground">
+                Inscription pré-remplie pour <strong>{preselected.title}</strong>.
+              </div>
+            )}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom complet</Label>
@@ -110,7 +136,7 @@ function ContactPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="subject">Sujet</Label>
-              <Input id="subject" name="subject" required maxLength={150} placeholder="Demande de devis pour…" />
+              <Input id="subject" name="subject" required maxLength={150} defaultValue={defaultSubject} placeholder="Demande de devis pour…" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="message">Message</Label>
