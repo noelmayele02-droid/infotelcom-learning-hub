@@ -15,10 +15,12 @@ import { trackEvent } from "@/lib/analytics";
 import { formations } from "@/data/formations";
 
 export const Route = createFileRoute("/contact")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    formation: typeof s.formation === "string" ? s.formation : undefined,
-    session: typeof s.session === "string" ? s.session : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { formation?: string; session?: string } => {
+    const out: { formation?: string; session?: string } = {};
+    if (typeof s.formation === "string") out.formation = s.formation;
+    if (typeof s.session === "string") out.session = s.session;
+    return out;
+  },
   head: () => ({
     meta: [
       { title: "Contact — Infotelcom Formation" },
