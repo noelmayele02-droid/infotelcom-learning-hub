@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, Check, Clock, Filter } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Clock, Filter } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { formations } from "@/data/formations";
+import { FaqJsonLd, FaqSection } from "@/components/FaqSection";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/formations")({
   head: () => ({
@@ -15,6 +17,7 @@ export const Route = createFileRoute("/formations")({
         content:
           "Catalogue complet des formations Infotelcom en télécoms (fibre, radio, transmission) et informatique (cybersécurité, dev, data).",
       },
+      { property: "og:type", content: "website" },
       { property: "og:title", content: "Catalogue des formations — Infotelcom" },
       { property: "og:description", content: "Toutes nos formations télécoms et informatique." },
     ],
@@ -24,6 +27,14 @@ export const Route = createFileRoute("/formations")({
 
 const categories = ["Toutes", "Télécoms", "Informatique"] as const;
 type Cat = (typeof categories)[number];
+
+const catalogFaq = [
+  { q: "Vos formations sont-elles éligibles à un financement ?", a: "Oui, plusieurs de nos parcours peuvent être financés via votre OPCO, votre employeur ou des dispositifs de formation continue. Contactez-nous pour étudier votre cas." },
+  { q: "Proposez-vous des sessions intra-entreprise ?", a: "Oui, toutes nos formations peuvent être organisées en intra, sur site client ou en distanciel, et adaptées à vos enjeux métier." },
+  { q: "Quelle est la durée moyenne d'une formation ?", a: "Nos formations durent généralement entre 3 et 10 jours selon la profondeur du programme et le niveau ciblé." },
+  { q: "Y a-t-il une certification à la fin ?", a: "Une attestation de fin de formation est délivrée à chaque participant. Certaines formations préparent en plus à des certifications éditeur." },
+  { q: "Où ont lieu les sessions présentielles ?", a: "Principalement à Brazzaville et Pointe-Noire, ainsi que sur site client en intra. Le calendrier détaillé est disponible sur la page Calendrier." },
+];
 
 function FormationsPage() {
   const [active, setActive] = useState<Cat>("Toutes");
@@ -92,14 +103,33 @@ function FormationsPage() {
                 </ul>
                 <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-4">
                   <span className="text-xs text-muted-foreground">Niveau {f.level}</span>
-                  <Button asChild size="sm">
-                    <Link to="/contact">S'inscrire</Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="outline"
+                      onClick={() => trackEvent("cta_click", { source: "catalog", label: "details", formation: f.slug })}
+                    >
+                      <Link to="/formations/$slug" params={{ slug: f.slug }}>
+                        Détails <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      size="sm"
+                      onClick={() => trackEvent("cta_click", { source: "catalog", label: "inscription", formation: f.slug })}
+                    >
+                      <Link to="/contact" search={{ formation: f.slug }}>S'inscrire</Link>
+                    </Button>
+                  </div>
                 </div>
               </article>
             ))}
           </div>
         </section>
+
+        <FaqJsonLd items={catalogFaq} />
+        <FaqSection items={catalogFaq} />
       </main>
       <SiteFooter />
     </div>
