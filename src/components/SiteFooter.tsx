@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, MapPin, Phone, Radio } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone, Radio } from "lucide-react";
 
 export function SiteFooter() {
   return (
@@ -22,7 +22,9 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/" className="hover:text-primary">Accueil</Link></li>
             <li><Link to="/formations" className="hover:text-primary">Formations</Link></li>
+            <li><Link to="/calendrier" className="hover:text-primary">Calendrier</Link></li>
             <li><Link to="/a-propos" className="hover:text-primary">À propos</Link></li>
+            <li><Link to="/equipe" className="hover:text-primary">Équipe</Link></li>
             <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
           </ul>
         </div>
@@ -40,9 +42,10 @@ export function SiteFooter() {
         <div>
           <h3 className="mb-3 text-sm font-semibold text-foreground">Contact</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 text-primary" /> Avenue des Télécoms, Douala</li>
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> +237 6 00 00 00 00</li>
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /> contact@infotelcom.com</li>
+            <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 text-primary" /> 17 rue Linengué, Casis — Brazzaville, Congo</li>
+            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> <a href="tel:+33652861159" className="hover:text-primary">+33 6 52 86 11 59</a></li>
+            <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-primary" /> <a href="https://wa.me/242068498792" target="_blank" rel="noopener" className="hover:text-primary">+242 06 849 87 92 (WhatsApp)</a></li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /> <a href="mailto:infotelcomtech@gmail.com" className="hover:text-primary">infotelcomtech@gmail.com</a></li>
           </ul>
         </div>
       </div>

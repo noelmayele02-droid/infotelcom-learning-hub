@@ -7,6 +7,11 @@ export type Formation = {
   price: string;
   description: string;
   highlights: string[];
+  objectives?: string[];
+  prerequisites?: string[];
+  program?: { title: string; items: string[] }[];
+  modalities?: string[];
+  faq?: { q: string; a: string }[];
 };
 
 export const formations: Formation[] = [

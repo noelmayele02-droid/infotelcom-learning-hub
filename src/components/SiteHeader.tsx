@@ -4,7 +4,9 @@ import { Radio } from "lucide-react";
 const navItems = [
   { to: "/", label: "Accueil" },
   { to: "/formations", label: "Formations" },
+  { to: "/calendrier", label: "Calendrier" },
   { to: "/a-propos", label: "À propos" },
+  { to: "/equipe", label: "Équipe" },
   { to: "/contact", label: "Contact" },
 ] as const;
 
