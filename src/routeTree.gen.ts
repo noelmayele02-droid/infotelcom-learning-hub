@@ -10,18 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FormationsRouteImport } from './routes/formations'
+import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FormationsSlugRouteImport } from './routes/formations.$slug'
+import { Route as ContactConfirmationRouteImport } from './routes/contact.confirmation'
 
 const FormationsRoute = FormationsRouteImport.update({
   id: '/formations',
   path: '/formations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EquipeRoute = EquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendrierRoute = CalendrierRouteImport.update({
+  id: '/calendrier',
+  path: '/calendrier',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AProposRoute = AProposRouteImport.update({
@@ -34,39 +48,88 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FormationsSlugRoute = FormationsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => FormationsRoute,
+} as any)
+const ContactConfirmationRoute = ContactConfirmationRouteImport.update({
+  id: '/confirmation',
+  path: '/confirmation',
+  getParentRoute: () => ContactRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
-  '/contact': typeof ContactRoute
-  '/formations': typeof FormationsRoute
+  '/calendrier': typeof CalendrierRoute
+  '/contact': typeof ContactRouteWithChildren
+  '/equipe': typeof EquipeRoute
+  '/formations': typeof FormationsRouteWithChildren
+  '/contact/confirmation': typeof ContactConfirmationRoute
+  '/formations/$slug': typeof FormationsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
-  '/contact': typeof ContactRoute
-  '/formations': typeof FormationsRoute
+  '/calendrier': typeof CalendrierRoute
+  '/contact': typeof ContactRouteWithChildren
+  '/equipe': typeof EquipeRoute
+  '/formations': typeof FormationsRouteWithChildren
+  '/contact/confirmation': typeof ContactConfirmationRoute
+  '/formations/$slug': typeof FormationsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
-  '/contact': typeof ContactRoute
-  '/formations': typeof FormationsRoute
+  '/calendrier': typeof CalendrierRoute
+  '/contact': typeof ContactRouteWithChildren
+  '/equipe': typeof EquipeRoute
+  '/formations': typeof FormationsRouteWithChildren
+  '/contact/confirmation': typeof ContactConfirmationRoute
+  '/formations/$slug': typeof FormationsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/a-propos' | '/contact' | '/formations'
+  fullPaths:
+    | '/'
+    | '/a-propos'
+    | '/calendrier'
+    | '/contact'
+    | '/equipe'
+    | '/formations'
+    | '/contact/confirmation'
+    | '/formations/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/a-propos' | '/contact' | '/formations'
-  id: '__root__' | '/' | '/a-propos' | '/contact' | '/formations'
+  to:
+    | '/'
+    | '/a-propos'
+    | '/calendrier'
+    | '/contact'
+    | '/equipe'
+    | '/formations'
+    | '/contact/confirmation'
+    | '/formations/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/a-propos'
+    | '/calendrier'
+    | '/contact'
+    | '/equipe'
+    | '/formations'
+    | '/contact/confirmation'
+    | '/formations/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AProposRoute: typeof AProposRoute
-  ContactRoute: typeof ContactRoute
-  FormationsRoute: typeof FormationsRoute
+  CalendrierRoute: typeof CalendrierRoute
+  ContactRoute: typeof ContactRouteWithChildren
+  EquipeRoute: typeof EquipeRoute
+  FormationsRoute: typeof FormationsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -78,11 +141,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/equipe': {
+      id: '/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof EquipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendrier': {
+      id: '/calendrier'
+      path: '/calendrier'
+      fullPath: '/calendrier'
+      preLoaderRoute: typeof CalendrierRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/a-propos': {
@@ -99,14 +176,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/formations/$slug': {
+      id: '/formations/$slug'
+      path: '/$slug'
+      fullPath: '/formations/$slug'
+      preLoaderRoute: typeof FormationsSlugRouteImport
+      parentRoute: typeof FormationsRoute
+    }
+    '/contact/confirmation': {
+      id: '/contact/confirmation'
+      path: '/confirmation'
+      fullPath: '/contact/confirmation'
+      preLoaderRoute: typeof ContactConfirmationRouteImport
+      parentRoute: typeof ContactRoute
+    }
   }
 }
+
+interface ContactRouteChildren {
+  ContactConfirmationRoute: typeof ContactConfirmationRoute
+}
+
+const ContactRouteChildren: ContactRouteChildren = {
+  ContactConfirmationRoute: ContactConfirmationRoute,
+}
+
+const ContactRouteWithChildren =
+  ContactRoute._addFileChildren(ContactRouteChildren)
+
+interface FormationsRouteChildren {
+  FormationsSlugRoute: typeof FormationsSlugRoute
+}
+
+const FormationsRouteChildren: FormationsRouteChildren = {
+  FormationsSlugRoute: FormationsSlugRoute,
+}
+
+const FormationsRouteWithChildren = FormationsRoute._addFileChildren(
+  FormationsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
-  ContactRoute: ContactRoute,
-  FormationsRoute: FormationsRoute,
+  CalendrierRoute: CalendrierRoute,
+  ContactRoute: ContactRouteWithChildren,
+  EquipeRoute: EquipeRoute,
+  FormationsRoute: FormationsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
