@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, Filter, MapPin, Users } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
-import { sessions, getFormationTitle, getFormationCategory } from "@/data/sessions";
+import { sessions as fallbackSessions, getFormationTitle, getFormationCategory, type Session } from "@/data/sessions";
+import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/calendrier")({
@@ -33,6 +34,34 @@ function fmtDate(iso: string) {
 
 function CalendarPage() {
   const [active, setActive] = useState<F>("Toutes");
+  const [sessions, setSessions] = useState<Session[]>(fallbackSessions);
+
+  useEffect(() => {
+    const load = async () => {
+      const todayISO = new Date().toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from("training_sessions")
+        .select("*")
+        .in("status", ["published", "full"])
+        .gte("start_date", todayISO)
+        .order("start_date", { ascending: true });
+      if (!error && data && data.length > 0) {
+        setSessions(
+          data.map((s) => ({
+            id: s.id,
+            formationSlug: s.formation_slug,
+            startDate: s.start_date,
+            endDate: s.end_date,
+            city: s.city,
+            mode: s.mode as Session["mode"],
+            seats: s.seats,
+          })),
+        );
+      }
+    };
+    load();
+  }, []);
+
   const list = sessions
     .filter((s) => active === "Toutes" || getFormationCategory(s.formationSlug) === active)
     .sort((a, b) => a.startDate.localeCompare(b.startDate));
