@@ -20,6 +20,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as FormationsSlugRouteImport } from './routes/formations.$slug'
 import { Route as ContactConfirmationRouteImport } from './routes/contact.confirmation'
 import { Route as AdminSubmissionsRouteImport } from './routes/admin.submissions'
+import { Route as AdminSessionsRouteImport } from './routes/admin.sessions'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const FormationsRoute = FormationsRouteImport.update({
@@ -77,6 +78,11 @@ const AdminSubmissionsRoute = AdminSubmissionsRouteImport.update({
   path: '/submissions',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSessionsRoute = AdminSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/sessions': typeof AdminSessionsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/sessions': typeof AdminSessionsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/sessions': typeof AdminSessionsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/formations'
     | '/admin/login'
+    | '/admin/sessions'
     | '/admin/submissions'
     | '/contact/confirmation'
     | '/formations/$slug'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/formations'
     | '/admin/login'
+    | '/admin/sessions'
     | '/admin/submissions'
     | '/contact/confirmation'
     | '/formations/$slug'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/formations'
     | '/admin/login'
+    | '/admin/sessions'
     | '/admin/submissions'
     | '/contact/confirmation'
     | '/formations/$slug'
@@ -258,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSubmissionsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sessions': {
+      id: '/admin/sessions'
+      path: '/sessions'
+      fullPath: '/admin/sessions'
+      preLoaderRoute: typeof AdminSessionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -270,12 +289,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminSessionsRoute: typeof AdminSessionsRoute
   AdminSubmissionsRoute: typeof AdminSubmissionsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
+  AdminSessionsRoute: AdminSessionsRoute,
   AdminSubmissionsRoute: AdminSubmissionsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
