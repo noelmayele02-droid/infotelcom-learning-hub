@@ -22,6 +22,7 @@ import { Route as ContactConfirmationRouteImport } from './routes/contact.confir
 import { Route as AdminSubmissionsRouteImport } from './routes/admin.submissions'
 import { Route as AdminSessionsRouteImport } from './routes/admin.sessions'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 
 const FormationsRoute = FormationsRouteImport.update({
   id: '/formations',
@@ -88,6 +89,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sessions': typeof AdminSessionsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sessions': typeof AdminSessionsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sessions': typeof AdminSessionsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/analytics'
     | '/admin/login'
     | '/admin/sessions'
     | '/admin/submissions'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/analytics'
     | '/admin/login'
     | '/admin/sessions'
     | '/admin/submissions'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/analytics'
     | '/admin/login'
     | '/admin/sessions'
     | '/admin/submissions'
@@ -284,10 +296,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminSessionsRoute: typeof AdminSessionsRoute
   AdminSubmissionsRoute: typeof AdminSubmissionsRoute
@@ -295,6 +315,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminSessionsRoute: AdminSessionsRoute,
   AdminSubmissionsRoute: AdminSubmissionsRoute,
