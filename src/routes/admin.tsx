@@ -44,12 +44,12 @@ function AdminLayout() {
     navigate({ to: "/admin/login" });
   };
 
-  const navItems = [
+  const navItems: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
     { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
     { to: "/admin/submissions", label: "Demandes contact", icon: Inbox },
     { to: "/admin/sessions", label: "Sessions", icon: CalendarDays },
     { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  ] as const;
+  ];
 
   return (
     <div className="flex min-h-screen bg-[image:var(--gradient-subtle)]">
@@ -70,9 +70,9 @@ function AdminLayout() {
               ? location.pathname === item.to
               : location.pathname.startsWith(item.to);
             return (
-              <Link
+            <Link
                 key={item.to}
-                to={item.to}
+                to={item.to as "/admin"}
                 className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
                   isActive
                     ? "bg-primary text-primary-foreground"
@@ -114,9 +114,9 @@ function AdminLayout() {
           {navItems.map((item) => (
             <Link
               key={item.to}
-              to={item.to}
+              to={item.to as "/admin"}
               className="shrink-0 rounded-md px-3 py-1.5 text-xs font-medium text-foreground/80 hover:bg-secondary [&.active]:bg-primary [&.active]:text-primary-foreground"
-              activeOptions={{ exact: item.exact }}
+              activeOptions={{ exact: !!item.exact }}
             >
               {item.label}
             </Link>
