@@ -50,17 +50,21 @@ export function trackEvent(name: string, props?: AnalyticsEvent["props"]) {
   // Fire-and-forget insert into Supabase. Errors are silently swallowed
   // so analytics never break the user experience.
   const source = typeof props?.source === "string" ? props.source : null;
-  void supabase
-    .from("analytics_events")
-    .insert({
-      event_type: name,
-      source,
-      page: window.location.pathname,
-      metadata: (props as Record<string, unknown>) ?? {},
-      anon_session_id: getAnonSessionId(),
-      user_agent: navigator.userAgent,
-    })
-    .then(() => {});
+  const cleanMeta: Record<string, unknown> = {};
+  if (props) {
+    for (const [k, v] of Object.entries(props)) {
+      if (v !== undefined) cleanMeta[k] = v;
+    }
+  }
+  const payload = {
+    event_type: name,
+    source,
+    page: window.location.pathname,
+    metadata: cleanMeta as never,
+    anon_session_id: getAnonSessionId(),
+    user_agent: navigator.userAgent,
+  };
+  void supabase.from("analytics_events").insert(payload as never).then(() => {});
 }
 
 export function getEvents(): AnalyticsEvent[] {
