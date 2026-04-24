@@ -13,10 +13,12 @@ import { Route as FormationsRouteImport } from './routes/formations'
 import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FormationsSlugRouteImport } from './routes/formations.$slug'
 import { Route as ContactConfirmationRouteImport } from './routes/contact.confirmation'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const FormationsRoute = FormationsRouteImport.update({
   id: '/formations',
@@ -36,6 +38,11 @@ const ContactRoute = ContactRouteImport.update({
 const CalendrierRoute = CalendrierRouteImport.update({
   id: '/calendrier',
   path: '/calendrier',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AProposRoute = AProposRouteImport.update({
@@ -58,24 +65,33 @@ const ContactConfirmationRoute = ContactConfirmationRouteImport.update({
   path: '/confirmation',
   getParentRoute: () => ContactRoute,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminRouteWithChildren
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminRouteWithChildren
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
 }
@@ -83,10 +99,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminRouteWithChildren
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
 }
@@ -95,30 +113,36 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/a-propos'
+    | '/admin'
     | '/calendrier'
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/login'
     | '/contact/confirmation'
     | '/formations/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/a-propos'
+    | '/admin'
     | '/calendrier'
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/login'
     | '/contact/confirmation'
     | '/formations/$slug'
   id:
     | '__root__'
     | '/'
     | '/a-propos'
+    | '/admin'
     | '/calendrier'
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/login'
     | '/contact/confirmation'
     | '/formations/$slug'
   fileRoutesById: FileRoutesById
@@ -126,6 +150,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AProposRoute: typeof AProposRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CalendrierRoute: typeof CalendrierRoute
   ContactRoute: typeof ContactRouteWithChildren
   EquipeRoute: typeof EquipeRoute
@@ -162,6 +187,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendrierRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/a-propos': {
       id: '/a-propos'
       path: '/a-propos'
@@ -190,8 +222,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactConfirmationRouteImport
       parentRoute: typeof ContactRoute
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ContactRouteChildren {
   ContactConfirmationRoute: typeof ContactConfirmationRoute
@@ -219,6 +268,7 @@ const FormationsRouteWithChildren = FormationsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
+  AdminRoute: AdminRouteWithChildren,
   CalendrierRoute: CalendrierRoute,
   ContactRoute: ContactRouteWithChildren,
   EquipeRoute: EquipeRoute,
@@ -227,3 +277,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
