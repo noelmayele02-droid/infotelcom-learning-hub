@@ -37,6 +37,14 @@ export const Route = createRootRoute({
       },
       { name: "author", content: "Infotelcom" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Infotelcom — Formations Télécoms & Informatique" },
+      { name: "twitter:title", content: "Infotelcom — Formations Télécoms & Informatique" },
+      { name: "description", content: "Formations Télécoms & Informatique" },
+      { property: "og:description", content: "Formations Télécoms & Informatique" },
+      { name: "twitter:description", content: "Formations Télécoms & Informatique" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d2b2e4d7-6382-4728-9470-329d5c57654c/id-preview-8859fc08--36bb1be9-4ecf-4279-aac4-9a9e89423465.lovable.app-1777024298051.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d2b2e4d7-6382-4728-9470-329d5c57654c/id-preview-8859fc08--36bb1be9-4ecf-4279-aac4-9a9e89423465.lovable.app-1777024298051.png" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       {
