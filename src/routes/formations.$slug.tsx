@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { FaqJsonLd, FaqSection } from "@/components/FaqSection";
-import { formations } from "@/data/formations";
+import { formations, type Formation } from "@/data/formations";
 import { trackEvent } from "@/lib/analytics";
 
 function getFormation(slug: string) {
@@ -74,7 +74,7 @@ const defaultFaq = [
 ];
 
 function FormationDetail() {
-  const f = Route.useLoaderData();
+  const f = Route.useLoaderData() as Formation;
   const objectives = f.objectives ?? defaultObjectives;
   const prerequisites = f.prerequisites ?? defaultPrerequisites;
   const modalities = f.modalities ?? defaultModalities;

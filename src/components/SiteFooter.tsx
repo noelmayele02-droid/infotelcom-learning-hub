@@ -50,8 +50,9 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-border/60">
-        <div className="container mx-auto px-4 py-4 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Infotelcom Formation. Tous droits réservés.
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-muted-foreground">
+          <span>© {new Date().getFullYear()} Infotelcom Formation. Tous droits réservés.</span>
+          <Link to="/admin/login" className="hover:text-primary">Espace admin</Link>
         </div>
       </div>
     </footer>

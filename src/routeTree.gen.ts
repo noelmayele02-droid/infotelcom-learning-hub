@@ -13,10 +13,16 @@ import { Route as FormationsRouteImport } from './routes/formations'
 import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as FormationsSlugRouteImport } from './routes/formations.$slug'
 import { Route as ContactConfirmationRouteImport } from './routes/contact.confirmation'
+import { Route as AdminSubmissionsRouteImport } from './routes/admin.submissions'
+import { Route as AdminSessionsRouteImport } from './routes/admin.sessions'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 
 const FormationsRoute = FormationsRouteImport.update({
   id: '/formations',
@@ -38,6 +44,11 @@ const CalendrierRoute = CalendrierRouteImport.update({
   path: '/calendrier',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AProposRoute = AProposRouteImport.update({
   id: '/a-propos',
   path: '/a-propos',
@@ -47,6 +58,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const FormationsSlugRoute = FormationsSlugRouteImport.update({
   id: '/$slug',
@@ -58,16 +74,42 @@ const ContactConfirmationRoute = ContactConfirmationRouteImport.update({
   path: '/confirmation',
   getParentRoute: () => ContactRoute,
 } as any)
+const AdminSubmissionsRoute = AdminSubmissionsRouteImport.update({
+  id: '/submissions',
+  path: '/submissions',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSessionsRoute = AdminSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminRouteWithChildren
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/sessions': typeof AdminSessionsRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -76,31 +118,48 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/sessions': typeof AdminSessionsRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminRouteWithChildren
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/sessions': typeof AdminSessionsRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
   '/contact/confirmation': typeof ContactConfirmationRoute
   '/formations/$slug': typeof FormationsSlugRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/a-propos'
+    | '/admin'
     | '/calendrier'
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/analytics'
+    | '/admin/login'
+    | '/admin/sessions'
+    | '/admin/submissions'
     | '/contact/confirmation'
     | '/formations/$slug'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,23 +168,35 @@ export interface FileRouteTypes {
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/analytics'
+    | '/admin/login'
+    | '/admin/sessions'
+    | '/admin/submissions'
     | '/contact/confirmation'
     | '/formations/$slug'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/a-propos'
+    | '/admin'
     | '/calendrier'
     | '/contact'
     | '/equipe'
     | '/formations'
+    | '/admin/analytics'
+    | '/admin/login'
+    | '/admin/sessions'
+    | '/admin/submissions'
     | '/contact/confirmation'
     | '/formations/$slug'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AProposRoute: typeof AProposRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CalendrierRoute: typeof CalendrierRoute
   ContactRoute: typeof ContactRouteWithChildren
   EquipeRoute: typeof EquipeRoute
@@ -162,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendrierRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/a-propos': {
       id: '/a-propos'
       path: '/a-propos'
@@ -175,6 +253,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/formations/$slug': {
       id: '/formations/$slug'
@@ -190,8 +275,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactConfirmationRouteImport
       parentRoute: typeof ContactRoute
     }
+    '/admin/submissions': {
+      id: '/admin/submissions'
+      path: '/submissions'
+      fullPath: '/admin/submissions'
+      preLoaderRoute: typeof AdminSubmissionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sessions': {
+      id: '/admin/sessions'
+      path: '/sessions'
+      fullPath: '/admin/sessions'
+      preLoaderRoute: typeof AdminSessionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminSessionsRoute: typeof AdminSessionsRoute
+  AdminSubmissionsRoute: typeof AdminSubmissionsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminSessionsRoute: AdminSessionsRoute,
+  AdminSubmissionsRoute: AdminSubmissionsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ContactRouteChildren {
   ContactConfirmationRoute: typeof ContactConfirmationRoute
@@ -219,6 +350,7 @@ const FormationsRouteWithChildren = FormationsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
+  AdminRoute: AdminRouteWithChildren,
   CalendrierRoute: CalendrierRoute,
   ContactRoute: ContactRouteWithChildren,
   EquipeRoute: EquipeRoute,
@@ -227,12 +359,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

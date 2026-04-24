@@ -67,17 +67,24 @@ function ContactPage() {
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
-      saveSubmission(parsed.data);
-      trackEvent("contact_submit", {
-        formation: search.formation,
-        session: search.session,
-        subject: parsed.data.subject,
-      });
-      setSubmitting(false);
-      toast.success("Demande enregistrée !");
-      navigate({ to: "/contact/confirmation" });
-    }, 400);
+    void saveSubmission({
+      ...parsed.data,
+      formationSlug: search.formation,
+      sessionId: search.session,
+    })
+      .then(() => {
+        trackEvent("contact_submit", {
+          formation: search.formation,
+          session: search.session,
+          subject: parsed.data.subject,
+        });
+        toast.success("Demande enregistrée !");
+        navigate({ to: "/contact/confirmation" });
+      })
+      .catch(() => {
+        toast.error("Une erreur est survenue. Réessayez ou contactez-nous par email.");
+      })
+      .finally(() => setSubmitting(false));
   };
 
   return (
