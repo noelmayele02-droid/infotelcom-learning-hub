@@ -205,7 +205,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      current_user_is_admin: { Args: never; Returns: boolean }
       diagnostic_rpc_ping: { Args: never; Returns: Json }
       has_role: {
         Args: {
