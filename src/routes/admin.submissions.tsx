@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Inbox, Mail, MessageSquare, Phone, Trash2 } from "lucide-react";
+import { Download, Inbox, Mail, MessageSquare, Phone, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +42,7 @@ function AdminSubmissions() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | Submission["status"]>("all");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -83,7 +84,56 @@ function AdminSubmissions() {
     }
   };
 
-  const filtered = filter === "all" ? items : items.filter((x) => x.status === filter);
+  const byStatus = filter === "all" ? items : items.filter((x) => x.status === filter);
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? byStatus.filter(
+        (x) =>
+          x.name.toLowerCase().includes(q) ||
+          x.email.toLowerCase().includes(q) ||
+          x.subject.toLowerCase().includes(q) ||
+          x.message.toLowerCase().includes(q) ||
+          (x.formation_slug ?? "").toLowerCase().includes(q),
+      )
+    : byStatus;
+
+  const exportCsv = () => {
+    if (filtered.length === 0) {
+      toast.error("Aucune donnée à exporter");
+      return;
+    }
+    const headers = [
+      "created_at",
+      "name",
+      "email",
+      "phone",
+      "subject",
+      "message",
+      "formation_slug",
+      "session_id",
+      "status",
+    ];
+    const escape = (v: unknown) => {
+      const s = v === null || v === undefined ? "" : String(v);
+      return `"${s.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+    };
+    const rows = filtered.map((s) =>
+      [s.created_at, s.name, s.email, s.phone, s.subject, s.message, s.formation_slug, s.session_id, s.status]
+        .map(escape)
+        .join(","),
+    );
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contact_submissions_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`${filtered.length} ligne(s) exportée(s)`);
+  };
 
   return (
     <div className="space-y-6">
@@ -92,6 +142,22 @@ function AdminSubmissions() {
         <p className="mt-1 text-sm text-muted-foreground">
           Toutes les demandes envoyées via le formulaire de contact.
         </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher (nom, email, sujet, message…)"
+            className="w-full rounded-md border border-border bg-card py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+          />
+        </div>
+        <Button variant="outline" size="sm" onClick={exportCsv}>
+          <Download className="h-4 w-4" /> Export CSV
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-2">
