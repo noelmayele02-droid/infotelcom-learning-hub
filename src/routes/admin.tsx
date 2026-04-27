@@ -21,13 +21,17 @@ function AdminLayout() {
   const { loading, user, isAdmin } = useAdminAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isLoginRoute = location.pathname.endsWith("/admin/login") || location.pathname.endsWith("/admin/login/");
 
   useEffect(() => {
+    if (isLoginRoute) return;
     if (loading) return;
     if (!user || !isAdmin) {
       navigate({ to: "/admin/login" });
     }
-  }, [loading, user, isAdmin, navigate]);
+  }, [isLoginRoute, loading, user, isAdmin, navigate]);
+
+  if (isLoginRoute) return <Outlet />;
 
   if (loading) {
     return (

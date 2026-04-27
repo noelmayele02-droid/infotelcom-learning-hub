@@ -113,6 +113,30 @@ export type Database = {
         }
         Relationships: []
       }
+      deployment_checks: {
+        Row: {
+          check_name: string
+          checked_at: string
+          details: Json
+          id: string
+          status: string
+        }
+        Insert: {
+          check_name: string
+          checked_at?: string
+          details?: Json
+          id?: string
+          status: string
+        }
+        Update: {
+          check_name?: string
+          checked_at?: string
+          details?: Json
+          id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       training_sessions: {
         Row: {
           city: string
@@ -181,6 +205,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      diagnostic_rpc_ping: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
