@@ -37,7 +37,7 @@ export const runPostRedeployVerification = createServerFn({ method: "POST" }).ha
   const db = { ok: false, error: "Variables serveur base manquantes" as string | null };
 
   if (url && serviceKey) {
-    const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const admin = createClient<Record<string, never>>(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const { error } = await admin.from("training_sessions").select("id", { count: "exact", head: true });
     db.ok = !error;
     db.error = error?.message ?? null;
