@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { CheckCircle2, XCircle, Loader2, RefreshCw, Database, Key, Cloud, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { checkLovableApiKey } from "@/lib/diagnostic.functions";
+import { checkLovableApiKey, runPostRedeployVerification } from "@/lib/diagnostic.functions";
+import { useAdminAuth } from "@/lib/use-admin-auth";
 
 export const Route = createFileRoute("/diagnostic")({
   head: () => ({
@@ -22,13 +23,17 @@ type Check = {
 };
 
 function DiagnosticPage() {
+  const { loading, user, isAdmin } = useAdminAuth();
+  const navigate = useNavigate();
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
 
   const [envCheck, setEnvCheck] = useState<Check>({ status: "idle" });
   const [connCheck, setConnCheck] = useState<Check>({ status: "idle" });
+  const [rpcCheck, setRpcCheck] = useState<Check>({ status: "idle" });
   const [authCheck, setAuthCheck] = useState<Check>({ status: "idle" });
   const [aiCheck, setAiCheck] = useState<Check>({ status: "idle" });
+  const [redeployCheck, setRedeployCheck] = useState<Check>({ status: "idle" });
 
   const runAll = async () => {
     // 1. Env
@@ -41,6 +46,15 @@ function DiagnosticPage() {
         message: "Variables d'environnement présentes",
         detail: `URL: ${supabaseUrl}\nClé anon: ${anonKey.slice(0, 20)}…${anonKey.slice(-10)}`,
       });
+    }
+
+    setRpcCheck({ status: "running" });
+    try {
+      const { data, error } = await (supabase as any).rpc("diagnostic_rpc_ping");
+      if (error) setRpcCheck({ status: "error", message: "RPC indisponible", detail: error.message });
+      else setRpcCheck({ status: "ok", message: "RPC Supabase OK", detail: JSON.stringify(data, null, 2) });
+    } catch (e) {
+      setRpcCheck({ status: "error", message: "Exception RPC", detail: e instanceof Error ? e.message : String(e) });
     }
 
     // 2. Connexion DB (lecture publique)
@@ -91,15 +105,36 @@ function DiagnosticPage() {
     } catch (e) {
       setAiCheck({ status: "error", message: "Exception serveur", detail: e instanceof Error ? e.message : String(e) });
     }
+
+    setRedeployCheck({ status: "running" });
+    try {
+      const r = await runPostRedeployVerification();
+      setRedeployCheck({
+        status: r.ok ? "ok" : "error",
+        message: r.ok ? "Vérification post-redéploiement OK" : "Vérification post-redéploiement en erreur",
+        detail: JSON.stringify(r, null, 2),
+      });
+    } catch (e) {
+      setRedeployCheck({ status: "error", message: "Exception post-redéploiement", detail: e instanceof Error ? e.message : String(e) });
+    }
   };
 
   useEffect(() => {
+    if (loading) return;
+    if (!user || !isAdmin) {
+      navigate({ to: "/admin/login" });
+      return;
+    }
     runAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading, user, isAdmin, navigate]);
 
-  const allOk = [envCheck, connCheck, authCheck, aiCheck].every((c) => c.status === "ok");
-  const anyRunning = [envCheck, connCheck, authCheck, aiCheck].some((c) => c.status === "running");
+  const checks = [envCheck, connCheck, rpcCheck, authCheck, aiCheck, redeployCheck];
+  const allOk = checks.every((c) => c.status === "ok");
+  const anyRunning = checks.some((c) => c.status === "running") || loading;
+
+  if (loading || !user || !isAdmin) {
+    return <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">Chargement…</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[image:var(--gradient-subtle)] py-12">
@@ -131,8 +166,10 @@ function DiagnosticPage() {
         <div className="space-y-3">
           <CheckCard icon={Key} title="Variables d'environnement" check={envCheck} />
           <CheckCard icon={Database} title="Connexion base de données" check={connCheck} />
+          <CheckCard icon={Database} title="Tests RPC Supabase" check={rpcCheck} />
           <CheckCard icon={Cloud} title="Service d'authentification" check={authCheck} />
           <CheckCard icon={Server} title="LOVABLE_API_KEY (AI Gateway)" check={aiCheck} />
+          <CheckCard icon={Server} title="Vérification post-redéploiement" check={redeployCheck} />
         </div>
       </div>
     </div>
