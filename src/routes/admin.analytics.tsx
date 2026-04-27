@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/analytics")({
@@ -19,24 +19,38 @@ type EventRow = {
 function AdminAnalytics() {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<7 | 30 | 90>(7);
+  const [range, setRange] = useState<7 | 30 | 90 | "custom">(7);
+  const today = new Date().toISOString().slice(0, 10);
+  const defaultFrom = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const [fromDate, setFromDate] = useState<string>(defaultFrom);
+  const [toDate, setToDate] = useState<string>(today);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const since = new Date();
-      since.setDate(since.getDate() - range);
-      const { data, error } = await supabase
+      let sinceISO: string;
+      let untilISO: string | null = null;
+      if (range === "custom") {
+        sinceISO = new Date(fromDate + "T00:00:00").toISOString();
+        untilISO = new Date(toDate + "T23:59:59").toISOString();
+      } else {
+        const since = new Date();
+        since.setDate(since.getDate() - range);
+        sinceISO = since.toISOString();
+      }
+      let q = supabase
         .from("analytics_events")
         .select("*")
-        .gte("created_at", since.toISOString())
+        .gte("created_at", sinceISO)
         .order("created_at", { ascending: false })
-        .limit(500);
+        .limit(1000);
+      if (untilISO) q = q.lte("created_at", untilISO);
+      const { data, error } = await q;
       if (!error) setEvents((data ?? []) as EventRow[]);
       setLoading(false);
     };
     load();
-  }, [range]);
+  }, [range, fromDate, toDate]);
 
   const stats = useMemo(() => {
     const byType: Record<string, number> = {};
@@ -58,6 +72,23 @@ function AdminAnalytics() {
   const top = (obj: Record<string, number>, n = 8) =>
     Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, n);
 
+  const exportCsv = () => {
+    if (events.length === 0) return;
+    const headers = ["created_at", "event_type", "source", "page"];
+    const escape = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+    const rows = events.map((e) => [e.created_at, e.event_type, e.source, e.page].map(escape).join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analytics_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -65,7 +96,7 @@ function AdminAnalytics() {
           <h1 className="text-2xl font-bold text-foreground md:text-3xl">Analytics & conversions</h1>
           <p className="mt-1 text-sm text-muted-foreground">Suivi des clics CTA, soumissions et vues.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {([7, 30, 90] as const).map((n) => (
             <button
               key={n}
@@ -79,6 +110,40 @@ function AdminAnalytics() {
               {n} jours
             </button>
           ))}
+          <button
+            onClick={() => setRange("custom")}
+            className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
+              range === "custom"
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-foreground/80 hover:bg-secondary"
+            }`}
+          >
+            Personnalisé
+          </button>
+          {range === "custom" && (
+            <>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground"
+              />
+              <span className="text-xs text-muted-foreground">→</span>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground"
+              />
+            </>
+          )}
+          <button
+            onClick={exportCsv}
+            disabled={events.length === 0}
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground/80 hover:bg-secondary disabled:opacity-50"
+          >
+            <Download className="h-3 w-3" /> CSV
+          </button>
         </div>
       </div>
 
