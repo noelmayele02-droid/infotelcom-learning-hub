@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FormationsRouteImport } from './routes/formations'
 import { Route as EquipeRouteImport } from './routes/equipe'
+import { Route as DiagnosticRouteImport } from './routes/diagnostic'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -32,6 +33,11 @@ const FormationsRoute = FormationsRouteImport.update({
 const EquipeRoute = EquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnosticRoute = DiagnosticRouteImport.update({
+  id: '/diagnostic',
+  path: '/diagnostic',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
+  '/diagnostic': typeof DiagnosticRoute
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/a-propos': typeof AProposRoute
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
+  '/diagnostic': typeof DiagnosticRoute
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/calendrier': typeof CalendrierRoute
   '/contact': typeof ContactRouteWithChildren
+  '/diagnostic': typeof DiagnosticRoute
   '/equipe': typeof EquipeRoute
   '/formations': typeof FormationsRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/calendrier'
     | '/contact'
+    | '/diagnostic'
     | '/equipe'
     | '/formations'
     | '/admin/analytics'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/a-propos'
     | '/calendrier'
     | '/contact'
+    | '/diagnostic'
     | '/equipe'
     | '/formations'
     | '/admin/analytics'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/calendrier'
     | '/contact'
+    | '/diagnostic'
     | '/equipe'
     | '/formations'
     | '/admin/analytics'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CalendrierRoute: typeof CalendrierRoute
   ContactRoute: typeof ContactRouteWithChildren
+  DiagnosticRoute: typeof DiagnosticRoute
   EquipeRoute: typeof EquipeRoute
   FormationsRoute: typeof FormationsRouteWithChildren
 }
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       path: '/equipe'
       fullPath: '/equipe'
       preLoaderRoute: typeof EquipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnostic': {
+      id: '/diagnostic'
+      path: '/diagnostic'
+      fullPath: '/diagnostic'
+      preLoaderRoute: typeof DiagnosticRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -353,6 +373,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CalendrierRoute: CalendrierRoute,
   ContactRoute: ContactRouteWithChildren,
+  DiagnosticRoute: DiagnosticRoute,
   EquipeRoute: EquipeRoute,
   FormationsRoute: FormationsRouteWithChildren,
 }
