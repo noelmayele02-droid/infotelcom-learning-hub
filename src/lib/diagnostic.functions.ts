@@ -1,10 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 
-export const checkLovableApiKey = createServerFn({ method: "GET" }).handler(async () => {
+async function pingLovableGateway() {
   const key = process.env.LOVABLE_API_KEY;
-  if (!key) {
-    return { ok: false, status: 0, error: "LOVABLE_API_KEY non définie côté serveur" };
-  }
+  if (!key) return { ok: false, status: 0, error: "LOVABLE_API_KEY non définie côté serveur" };
+
   try {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -26,4 +26,27 @@ export const checkLovableApiKey = createServerFn({ method: "GET" }).handler(asyn
   } catch (e) {
     return { ok: false, status: 0, error: e instanceof Error ? e.message : String(e) };
   }
+}
+
+export const checkLovableApiKey = createServerFn({ method: "GET" }).handler(async () => pingLovableGateway());
+
+export const runPostRedeployVerification = createServerFn({ method: "POST" }).handler(async () => {
+  const ai = await pingLovableGateway();
+  const url = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const db = { ok: false, error: "Variables serveur base manquantes" as string | null };
+
+  if (url && serviceKey) {
+    const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { error } = await admin.from("training_sessions").select("id", { count: "exact", head: true });
+    db.ok = !error;
+    db.error = error?.message ?? null;
+    await admin.from("deployment_checks").insert({
+      check_name: "post_redeploy",
+      status: ai.ok && db.ok ? "ok" : "error",
+      details: { ai, db },
+    });
+  }
+
+  return { ok: ai.ok && db.ok, ai, db, checked_at: new Date().toISOString() };
 });
